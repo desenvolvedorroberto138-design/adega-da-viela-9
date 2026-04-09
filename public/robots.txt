@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adegaviela9.web.app/sitemap.xml
