@@ -147,7 +147,7 @@ function handleQtyChange(btn) {
         if (carrinho[chave].quantidade === 0) delete carrinho[chave];
     }
 
-    safeSet('carrinho_adega_gl', carrinho);
+    safeSet('carrinho_adega_viela_9', carrinho);
     atualizarDisplayCarrinho();
     atualizarBadge(id, chave);
 }
@@ -287,12 +287,12 @@ function enviarWhatsApp() {
     
     const formatar = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    let msg = `🛒 *NOVO PEDIDO - ADEGA GL*\n\n`;
+    let msg = `🛒 *NOVO PEDIDO - ADEGA VIELA 9*\n\n`;
     msg += `👤 *Cliente:* ${nome.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}\n`;
     msg += `📱 *Telefone:* ${tel.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}\n`;
     
     if (opcao === 'retirada') {
-        msg += `🏪 *Retirada na loja*\n📍 Av. Miguel Badra, 123 - Centro\n`;
+        msg += `🏪 *Retirada na loja*\n📍 Rua Daniel dos Santos, Viela Nove, 763 - Suzano\n`;
     } else {
         msg += `🚚 *Entrega:* Taxa fixa ${formatar(TAXA_ENTREGA_FIXA)}\n📍 *Endereço:* ${el.clienteEndereco.value.trim()}\n`;
     }
@@ -582,7 +582,7 @@ function init() {
     });
 
     // Carrega carrinho salvo
-    carrinho = safeGet('carrinho_adega_gl', {});
+    carrinho = safeGet('carrinho_adega_viela_9', {});
     
     // Setup inicial
     atualizarDisplayCarrinho();
@@ -593,7 +593,7 @@ function init() {
     // Registra todos os eventos
     setupEventListeners();
     
-    console.log('🍷 Adega GL inicializado.');
+    console.log('🍷 Adega Viela 9 inicializado.');
 }
 
 // Inicia quando DOM estiver pronto
