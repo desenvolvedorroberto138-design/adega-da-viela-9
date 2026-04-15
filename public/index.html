@@ -212,61 +212,148 @@
         </div>
     </div>
 
-    <!-- ========== MODAL DE CHECKOUT ========== -->
-    <div id="checkoutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
-      <div class="modal-content">
-        <button class="close-modal" id="closeModal" aria-label="Fechar modal">&times;</button>
-        <h2 id="modalTitle">Finalize seu pedido</h2>
-        <form id="checkoutForm">
-          <div class="form-group">
-            <label for="clienteNome">Nome:</label>
-            <input type="text" id="clienteNome" placeholder="Seu nome" required>
-          </div>
+   <!-- ========== MODAL DE CHECKOUT ========== -->
+  <div id="checkoutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModal" aria-label="Fechar modal">&times;</button>
+      <h2 id="modalTitle">🛒 Finalize seu pedido</h2>
 
-          <!-- 📱 CAMPO TELEFONE (OBRIGATÓRIO) -->
-          <div class="form-group">
-            <label for="clienteTelefone">Telefone / WhatsApp:</label>
-            <input type="tel" id="clienteTelefone" placeholder="(11) 99999-9999" required pattern="[0-9]{2}[0-9]{5}[0-9]{4}" title="Formato: (11) 99999-9999">
-          </div>
+      <form id="checkoutForm" novalidate>
 
-          <!-- 📍 ENDEREÇO (SÓ APARECE SE FOR ENTREGA) -->
-          <div class="form-group" id="enderecoGroup">
-            <label for="clienteEndereco">Endereço de entrega:</label>
-            <input type="text" id="clienteEndereco" placeholder="Bairro / Rua, Nº">
-            <small id="enderecoHelp" style="color: #6c757d; font-size: 0.8rem;"></small>
+        <!-- TIPO DE ENVIO -->
+        <div class="form-group">
+          <label>Tipo de envio:</label>
+          <div class="tipo-envio-group">
+            <input type="radio" name="opcaoEnvio" id="tipoEntrega" value="entrega" checked>
+            <label for="tipoEntrega"><span class="ico">🚚</span>Entrega</label>
+            <input type="radio" name="opcaoEnvio" id="tipoRetirada" value="retirada">
+            <label for="tipoRetirada"><span class="ico">🏪</span>Retirada</label>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="formaPagamento">Forma de pagamento:</label>
-            <select id="formaPagamento" required>
-              <option value="">Selecione</option>
-              <option value="Dinheiro">Dinheiro</option>
-              <option value="Pix">Pix</option>
-              <option value="Cartão Débito">Cartão Débito</option>
-              <option value="Cartão Crédito">Cartão Crédito</option>
-            </select>
-          </div>
+        <!-- TEXTO INFORMATIVO -->
+        <div class="texto-informativo" id="textoInformativo">
+          📍 <strong>Entrega:</strong><br>Informe seu endereço no próximo passo.<br><small>Taxa fixa de entrega: R$ 5,00.</small>
+        </div>
 
-          <div id="trocoContainer" class="hidden">
+        <!-- NOME -->
+        <div class="form-group">
+          <label for="clienteNome">Nome: <span class="req">*</span></label>
+          <input type="text" id="clienteNome" placeholder="Seu nome" required>
+          <div class="err-msg" id="nomeError">⚠️ Por favor, insira seu nome</div>
+        </div>
+
+        <!-- TELEFONE -->
+        <div class="form-group">
+          <label for="clienteTelefone">Telefone / WhatsApp: <span class="req">*</span></label>
+          <input type="tel" id="clienteTelefone" placeholder="(11) 99999-9999" required>
+          <div class="err-msg" id="telefoneError">⚠️ Número inválido. Use (XX) XXXXX-XXXX</div>
+          <div class="ok-msg" id="telefoneSuccess">✅ Número válido</div>
+        </div>
+
+        <!-- ENDEREÇO DE ENTREGA -->
+        <div class="endereco-group hidden" id="enderecoGroup">
+
+          <!-- CEP -->
+          <div class="cep-row">
             <div class="form-group">
-              <label for="troco">Troco para quanto?</label>
-              <input type="text" id="troco" placeholder="Ex: 50,00" inputmode="numeric">
+              <label for="clienteCep">CEP: <span class="req">*</span></label>
+              <input type="text" id="clienteCep" placeholder="00000-000" maxlength="9" inputmode="numeric">
+              <div class="err-msg" id="cepError">⚠️ CEP inválido</div>
+              <div class="cep-loading" id="cepLoading"><div class="spinner"></div> Buscando endereço...</div>
+              <div class="ok-msg" id="cepSuccess">✅ CEP encontrado</div>
             </div>
-            <div id="valorTroco"></div>
+            <button type="button" class="btn-busca-cep" id="btnBuscaCep" title="Buscar CEP">🔍</button>
           </div>
 
-          <div id="resumoPedido">
-            <hr>
-            <p>💰 Produtos: <span id="resumoProdutos">R$ 0,00</span></p>
-            <p>🚚 Entrega: <span id="resumoEntrega">R$ 0,00</span></p>
-            <p><strong>🧾 Total: <span id="resumoTotal">R$ 0,00</span></strong></p>
+          <!-- BARRA DE INFO -->
+          <div class="info-bar" id="deliveryInfo">
+            <span id="deliveryInfoIcon"></span>
+            <span id="deliveryInfoText"></span>
           </div>
 
-          <button type="button" id="enviarWhatsapp">Enviar pelo WhatsApp</button>
-        </form>
-      </div>
+          <!-- CAMPOS AUTO-PREENCHIDOS -->
+          <div class="endereco-grid">
+            <div class="form-group full">
+              <label for="clienteRua">Rua:</label>
+              <input type="text" id="clienteRua" placeholder="Aparecerá automaticamente" readonly>
+            </div>
+            <div class="form-group">
+              <label for="clienteBairro">Bairro:</label>
+              <input type="text" id="clienteBairro" placeholder="Aparecerá automaticamente" readonly>
+            </div>
+            <div class="form-group">
+              <label for="clienteCidade">Cidade / UF:</label>
+              <input type="text" id="clienteCidade" placeholder="Aparecerá automaticamente" readonly>
+            </div>
+          </div>
+
+          <!-- NÚMERO E COMPLEMENTO -->
+          <div class="numero-comp">
+            <div class="form-group">
+              <label for="clienteNumero">Nº: <span class="req">*</span></label>
+              <input type="text" id="clienteNumero" placeholder="Nº" inputmode="numeric">
+              <div class="err-msg" id="numeroError">⚠️ Nº obrigatório</div>
+            </div>
+            <div class="form-group">
+              <label for="clienteComplemento">Complemento:</label>
+              <input type="text" id="clienteComplemento" placeholder="Apto, Bloco...">
+            </div>
+          </div>
+
+          <!-- REFERÊNCIA -->
+          <div class="form-group">
+            <label for="clienteReferencia">Ponto de referência:</label>
+            <input type="text" id="clienteReferencia" placeholder="Ex: Próximo ao mercado">
+          </div>
+
+          <!-- BADGE -->
+          <div class="val-badge hide" id="enderecoBadge">
+            <span id="enderecoBadgeIcon"></span>
+            <span id="enderecoBadgeText"></span>
+          </div>
+        </div>
+
+        <!-- PAGAMENTO -->
+        <div class="form-group">
+          <label for="formaPagamento">Forma de pagamento: <span class="req">*</span></label>
+          <select id="formaPagamento" required>
+            <option value="">Selecione</option>
+            <option value="Dinheiro">💵 Dinheiro</option>
+            <option value="Pix">📱 Pix</option>
+            <option value="Cartão Débito">💳 Cartão Débito</option>
+            <option value="Cartão Crédito">💳 Cartão Crédito</option>
+          </select>
+          <div class="err-msg" id="pagamentoError">⚠️ Selecione uma forma de pagamento</div>
+        </div>
+
+        <!-- TROCO -->
+        <div id="trocoContainer" class="hidden">
+          <div class="form-group">
+            <label for="inputTroco">Troco para quanto?</label>
+            <input type="text" id="inputTroco" placeholder="Ex: 50,00" inputmode="numeric">
+          </div>
+          <div id="valorTroco"></div>
+        </div>
+
+        <!-- RESUMO -->
+        <div id="resumoPedido">
+          <hr>
+          <p>💰 Produtos: <span id="resumoProdutos">R$ 0,00</span></p>
+          <p>🚚 Entrega: <span id="resumoEntrega">R$ 0,00</span></p>
+          <p><strong>🧾 Total: <span id="resumoTotal">R$ 0,00</span></strong></p>
+        </div>
+
+        <!-- ENVIAR -->
+        <button type="button" id="enviarWhatsapp">
+          📲 Enviar pelo WhatsApp
+        </button>
+      </form>
     </div>
+  </div>
 
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
     <!-- Scripts -->
     <script src="js/script.js"></script>
 </body>

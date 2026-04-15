@@ -57,6 +57,9 @@ let ordenacaoAtual = 'name-asc';
 let viewMode = 'grid';
 let totalGlobal = 0;
 
+let cepValido = false;
+let cepDados = null;
+
 // ✅ TAXA FIXA DE ENTREGA (ALTERE AQUI SE PRECISAR)
 const TAXA_ENTREGA_FIXA = 5.00;
 
@@ -270,19 +273,31 @@ function enviarWhatsApp() {
 
     if (!nome || !tel || !pag) return alert('⚠️ Preencha: Nome, Telefone e Forma de Pagamento!');
     
-    if (opcao === 'entrega' && totalGlobal < 25) {
-        return alert('🚚 Pedido mínimo para entrega é R$ 25,00.\nAdicione mais itens ou escolha "Retirada".');
+  if (opcao === 'entrega' && totalGlobal < 25) {
+    return alert('🚚 Pedido mínimo para entrega é R$ 25,00 em produtos.\nAdicione mais itens ou escolha "Retirada".');
+}
+
+   if (opcao === 'entrega') {
+    if (!el.clienteCep.value || el.clienteCep.value.length < 9) {
+        return alert('📍 Informe um CEP válido!');
     }
 
-    if (opcao === 'entrega' && !el.clienteEndereco?.value.trim()) {
-        return alert('📍 Informe o endereço para entrega!');
+    if (!el.clienteRua.value) {
+        return alert('📍 Busque o CEP antes de continuar!');
     }
+
+    if (!el.clienteNumero.value.trim()) {
+        return alert('🏠 Informe o número da residência!');
+    }
+}
 
     if (pag === 'Dinheiro' && !el.inputTroco?.value.trim()) {
         return alert('💵 Informe o valor para troco!');
     }
 
-    const taxaEntrega = (opcao === 'entrega') ? TAXA_ENTREGA_FIXA : 0;
+   const taxaEntrega = (opcao === 'entrega' && totalGlobal >= 25) 
+    ? TAXA_ENTREGA_FIXA 
+    : 0;
     const totalFinal = totalGlobal + taxaEntrega;
     
     const formatar = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -294,7 +309,23 @@ function enviarWhatsApp() {
     if (opcao === 'retirada') {
         msg += `🏪 *Retirada na loja*\n📍 Rua Daniel dos Santos, Viela Nove, 763 - Suzano\n`;
     } else {
-        msg += `🚚 *Entrega:* Taxa fixa ${formatar(TAXA_ENTREGA_FIXA)}\n📍 *Endereço:* ${el.clienteEndereco.value.trim()}\n`;
+       const comp = el.clienteComplemento?.value.trim();
+const ref = el.clienteReferencia?.value.trim();
+
+if (taxaEntrega > 0) {
+    msg += `🚚 *Entrega:* ${formatar(taxaEntrega)}\n`;
+} else {
+    msg += `🚚 *Entrega:* Grátis\n`;
+}
+msg += `📍 *Endereço:* ${el.clienteRua.value}, Nº ${el.clienteNumero.value.trim()}`;
+
+if (comp) msg += ` - ${comp}`;
+
+msg += `\n📌 ${el.clienteBairro.value} - ${el.clienteCidade.value}`;
+
+if (ref) msg += `\n🗺️ Ref: ${ref}`;
+
+msg += `\n📮 CEP: ${el.clienteCep.value}\n`;
     }
     
     msg += `\n🍻 *Itens:*\n━━━━━━━━━━━━━━━\n`;
@@ -312,7 +343,7 @@ function enviarWhatsApp() {
     msg += `💳 *Pagamento:* ${pag}\n`;
 
     if (pag === 'Dinheiro') {
-        const trocoVal = parseFloat(el.inputTroco.value.replace(',', '.'));
+      const trocoVal = parseFloat(el.inputTroco.value.replace(',', '.'));
         const trocoCalc = trocoVal - totalFinal;
         msg += `💵 *Troco para:* ${formatar(trocoVal)}\n`;
         if (trocoCalc >= 0) {
@@ -446,6 +477,16 @@ function setupEventListeners() {
         // Outside click em dropdowns
         if (!e.target.closest('.sidebar')) $$('.dropdown').forEach(d => d.classList.remove('active'));
     });
+    // EVENTOS DO CEP
+el.btnBuscaCep.addEventListener('click', buscarCep);
+
+el.clienteCep.addEventListener('blur', buscarCep);
+
+el.clienteCep.addEventListener('input', () => {
+    if (el.clienteCep.value.length === 9) {
+        buscarCep();
+    }
+});
 
     // Carrinho
     el.cartBtn?.addEventListener('click', () => { 
@@ -562,12 +603,11 @@ function init() {
         enviarWhatsapp: $('#enviarWhatsapp'),
         clienteNome: $('#clienteNome'),
         clienteTelefone: $('#clienteTelefone'),
-        clienteEndereco: $('#clienteEndereco'),
         enderecoGroup: $('#enderecoGroup'),
         enderecoHelp: $('#enderecoHelp'),
         formaPagamento: $('#formaPagamento'),
         trocoContainer: $('#trocoContainer'),
-        inputTroco: $('#troco'),
+        inputTroco: $('#inputTroco'),
         valorTroco: $('#valorTroco'),
         resumoProdutos: $('#resumoProdutos'),
         resumoEntrega: $('#resumoEntrega'),
@@ -578,8 +618,36 @@ function init() {
         // Elementos do hamburger menu
         sidebar: $('#sidebar'),
         hamburgerBtn: $('#hamburgerBtn'),
-        sidebarOverlay: $('#sidebarOverlay')
+        sidebarOverlay: $('#sidebarOverlay'),
+        clienteCep: $('#clienteCep'),
+        clienteRua: $('#clienteRua'),
+        clienteBairro: $('#clienteBairro'),
+        clienteCidade: $('#clienteCidade'),
+        clienteNumero: $('#clienteNumero'),
+        clienteComplemento: $('#clienteComplemento'),
+        clienteReferencia: $('#clienteReferencia'),
+
+        btnBuscaCep: $('#btnBuscaCep'),
+        cepLoading: $('#cepLoading'),
+        cepError: $('#cepError'),
+        cepSuccess: $('#cepSuccess'),
+
+        deliveryInfo: $('#deliveryInfo'),
+        deliveryInfoIcon: $('#deliveryInfoIcon'),
+        deliveryInfoText: $('#deliveryInfoText'),
+
+        enderecoBadge: $('#enderecoBadge'),
+        enderecoBadgeIcon: $('#enderecoBadgeIcon'),
+        enderecoBadgeText: $('#enderecoBadgeText'),
+
+        numeroError: $('#numeroError'),
+        telefoneError: $('#telefoneError'),
+        telefoneSuccess: $('#telefoneSuccess'),
+        nomeError: $('#nomeError'),
+        pagamentoError: $('#pagamentoError')
     });
+
+    
 
     // Carrega carrinho salvo
     carrinho = safeGet('carrinho_adega_viela_9', {});
@@ -601,4 +669,41 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
+}
+// ====================
+// BUSCAR CEP (ViaCEP)
+// ====================
+async function buscarCep() {
+    const cep = el.clienteCep.value.replace(/\D/g, '');
+
+    el.cepError.style.display = 'none';
+    el.cepSuccess.style.display = 'none';
+
+    if (cep.length !== 8) {
+        el.cepError.style.display = 'block';
+        return;
+    }
+
+    el.cepLoading.style.display = 'flex';
+
+    try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+
+        if (data.erro) throw new Error();
+
+        el.clienteRua.value = data.logradouro || '';
+        el.clienteBairro.value = data.bairro || '';
+        el.clienteCidade.value = `${data.localidade} - ${data.uf}` || '';
+
+        el.cepSuccess.style.display = 'block';
+
+    } catch {
+        el.clienteRua.value = '';
+        el.clienteBairro.value = '';
+        el.clienteCidade.value = '';
+        el.cepError.style.display = 'block';
+    } finally {
+        el.cepLoading.style.display = 'none';
+    }
 }
