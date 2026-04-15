@@ -216,7 +216,7 @@ function verificarPedidoMinimo() {
         el.textoInformativo.innerHTML = `📍 <strong>Entrega:</strong><br>Informe seu endereço no próximo passo.<br><small>Taxa fixa de entrega: ${formatarPreco(TAXA_ENTREGA_FIXA)}.</small>`;
         el.textoInformativo.style.borderLeftColor = '#FF1493';
     } else {
-        el.textoInformativo.innerHTML = `🏪 <strong>Retirada na loja:</strong><br>Rua Daniel dos Santos, Viela Nove,  123 - Suzano<br>Aberto das 18h às 02h`;
+        el.textoInformativo.innerHTML = `🏪 <strong>Retirada na loja:</strong><br>Rua Daniel dos Santos, Viela Nove,  763 - Suzano<br>Aberto das 11h às 02h`;
         el.textoInformativo.style.borderLeftColor = '#28a745';
     }
 
