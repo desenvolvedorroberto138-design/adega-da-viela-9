@@ -252,10 +252,18 @@ function atualizarResumo() {
 // ====================
 function abrirModal() {
     if (totalGlobal === 0) return alert('🛒 Adicione produtos antes de finalizar.');
+
     el.checkoutForm?.reset();
+
+    // 👇 ADICIONE ISSO
+    document.querySelector('#tipoEntrega').checked = true;
+
     el.trocoContainer?.classList.add('hidden');
     if (el.valorTroco) el.valorTroco.textContent = '';
+
+    verificarPedidoMinimo(); // 👈 IMPORTANTE
     atualizarResumo();
+
     el.modal?.classList.add('active');
     el.modal?.setAttribute('aria-hidden', 'false');
 }
@@ -357,7 +365,7 @@ msg += `\n📮 CEP: ${el.clienteCep.value}\n`;
     msg += `\n⏰ Pedido: ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
 
     carrinho = {};
-    safeSet('carrinho_adega_gl', carrinho);
+    safeSet('carrinho_adega_viela_9', carrinho);
     atualizarDisplayCarrinho();
     renderizarProdutos();
     fecharModal();
@@ -499,7 +507,7 @@ el.clienteCep.addEventListener('input', () => {
     el.clearCart?.addEventListener('click', () => { 
         if (confirm('Limpar sacola?')) { 
             carrinho = {}; 
-            safeSet('carrinho_adega_gl', carrinho); 
+            safeSet('carrinho_adega_viela_9', carrinho); 
             atualizarDisplayCarrinho(); 
             renderizarProdutos(); 
         } 
@@ -613,7 +621,6 @@ function init() {
         resumoEntrega: $('#resumoEntrega'),
         resumoTotal: $('#resumoTotal'),
         radioEnvio: $$('input[name="opcaoEnvio"]'),
-        infoDestinoContainer: $('#infoDestinoContainer'),
         textoInformativo: $('#textoInformativo'),
         // Elementos do hamburger menu
         sidebar: $('#sidebar'),
