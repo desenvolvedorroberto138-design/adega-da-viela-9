@@ -72,14 +72,20 @@ body {
    ========================================= */
 .sidebar {
   width: 280px;
-  background: linear-gradient(180deg, var(--primary) 100%);
+  background: var(--primary); /* já ajustado */
   color: white;
   padding: 2rem 1.5rem;
   position: fixed;
   height: 100vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   z-index: 100;
   transition: var(--transition);
+}
+
+.categories {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .logo {
@@ -160,28 +166,6 @@ body {
   transform: none;
 }
 
-/* =========================================
-   SIDEBAR (Unificada + Footer)
-   ========================================= */
-.sidebar {
-  width: 280px;
-  background: linear-gradient(180deg, var(--primary) 100%);
-  color: white;
-  padding: 2rem 1.5rem;
-  position: fixed;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
-  transition: var(--transition);
-  /* ⚠️ REMOVIDO overflow-y: auto daqui para não quebrar o flex layout */
-}
-
-.categories {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 10px;
-}
 
 /* ✅ RODAPÉ DA SIDEBAR (WhatsApp & Localização) */
 .sidebar-footer {

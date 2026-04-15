@@ -123,11 +123,10 @@
 ---
 
 ## 🔄 PRÓXIMAS ENTREGAS (Em Fila no `TODO.md`)
-1. Correção da regra `.sidebar` duplicada no CSS
-2. Implementação do objeto `CONFIG` no JS
-3. Máscara de telefone em tempo real + validação robusta
-4. Foco trap em modais (Acessibilidade WCAG 2.1)
-5. Modal de verificação de idade (18+) + conformidade LGPD
+1. Implementação do objeto `CONFIG` no JS
+2. Máscara de telefone em tempo real + validação robusta
+3. Foco trap em modais (Acessibilidade WCAG 2.1)
+4. Modal de verificação de idade (18+) + conformidade LGPD
 
 ---
 
