@@ -62,6 +62,8 @@ let cepDados = null;
 
 // ✅ TAXA FIXA DE ENTREGA (ALTERE AQUI SE PRECISAR)
 const TAXA_ENTREGA_FIXA = 5.00;
+const ENDERECO_LOJA = 'Rua Daniel dos Santos, Viela Nove, 763 - Suzano';
+const HORARIO_FUNCIONAMENTO = 'Aberto das 18h às 02h';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
@@ -216,7 +218,7 @@ function verificarPedidoMinimo() {
         el.textoInformativo.innerHTML = `📍 <strong>Entrega:</strong><br>Informe seu endereço no próximo passo.<br><small>Taxa fixa de entrega: ${formatarPreco(TAXA_ENTREGA_FIXA)}.</small>`;
         el.textoInformativo.style.borderLeftColor = '#FF1493';
     } else {
-        el.textoInformativo.innerHTML = `🏪 <strong>Retirada na loja:</strong><br>Rua Daniel dos Santos, Viela Nove,  763 - Suzano<br>Aberto das 11h às 02h`;
+       el.textoInformativo.innerHTML = `🏪 <strong>Retirada na loja:</strong><br>${ENDERECO_LOJA}<br>${HORARIO_FUNCIONAMENTO}`;
         el.textoInformativo.style.borderLeftColor = '#28a745';
     }
 
@@ -315,7 +317,7 @@ function enviarWhatsApp() {
     msg += `📱 *Telefone:* ${tel.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}\n`;
     
     if (opcao === 'retirada') {
-        msg += `🏪 *Retirada na loja*\n📍 Rua Daniel dos Santos, Viela Nove, 763 - Suzano\n`;
+      msg += `🏪 *Retirada na loja*\n📍 ${ENDERECO_LOJA}\n🕒 ${HORARIO_FUNCIONAMENTO}\n`;
     } else {
        const comp = el.clienteComplemento?.value.trim();
 const ref = el.clienteReferencia?.value.trim();
