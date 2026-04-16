@@ -1,0 +1,50 @@
+'use strict';
+
+/**
+ * DADOS DOS PRODUTOS
+ * Catálogo completo da loja
+ */
+
+export const produtos = [
+    { id: 1, nome: 'SNICKERS 42G', codigo: 'SNK001', preco: 4.50, imagem: 'assets/images/merce/snickers-45g.webp', categoria: 'Doces' },
+    { id: 2, nome: 'COCA-COLA 350ML', codigo: 'CCA002', preco: 4.20, imagem: 'assets/images/beer-no-alcool/coca-cola-lata-350-ml.jfif', categoria: 'Refrigerantes Lata' },
+    { id: 3, nome: 'CERVEJA SKOL 350ML', codigo: 'BRH003', preco: 3.80, imagem: 'assets/images/cerveja/skol-lata-350-ml.webp', categoria: 'Cervejas Avulsas' },
+    { id: 4, nome: 'TORCIDA 60G', codigo: 'TOR004', preco: 3.00, imagem: 'assets/images/merce/torcida-saladinhos.webp', categoria: 'Salgadinhos', sabores: ['Churrasco', 'Bacon', 'Pimenta Mexicana', 'Cebola', 'Vinagrete', 'Costelinha'] },
+    { id: 5, nome: 'WHISKY JACK DANIELS 1L', codigo: 'JCK005', preco: 149.90, imagem: 'assets/images/cachaca/whisky_jack_daniels_1000ml.webp', categoria: 'Whisky' },
+    { id: 6, nome: 'HEINEKEN 295ML', codigo: 'HEI006', preco: 12.90, imagem: 'assets/images/cerveja/cerveja-long-neck-heineken.webp', categoria: 'Cervejas Avulsas' },
+    { id: 7, nome: 'COCA-COLA RETORNAVEL 2L', codigo: 'COC007', preco: 9.00, imagem: 'assets/images/beer-no-alcool/coca-retornavel-2l.jfif', categoria: 'Refrigerantes 2L' },
+    { id: 8, nome: 'CERVEJA ORIGINAL LATA 269 ML', codigo: 'CERV008', preco: 4.00, imagem: 'assets/images/cerveja/original-lata-269-ml.webp', categoria: 'Cervejas Avulsas' },
+    { id: 9, nome: 'CERVEJA IMPÉRIO LATA 350ML', codigo: 'IMP009', preco: 3.50, imagem: 'assets/images/cerveja/cerveja_imperio_puro_malte_pilsen_350ml_lata.jpg', categoria: 'Cervejas Avulsas' },
+    { id: 10, nome: 'DOSE GIN BEEFEATER PINK', codigo: 'BEEPK0010', preco: 44.90, imagem: 'assets/images/cachaca/doses/dose-beefeater-pink-700ml.jfif', categoria: 'Doses' },
+    { id: 11, nome: 'GIN ETERNITY MAÇA VERDE 900ML', codigo: 'GIN0011', preco: 25.00, imagem: 'assets/images/cachaca/gin-invictus-maça-verde-900ml.webp', categoria: 'Gin' },
+    { id: 12, nome: 'GIN ETERNITY MARACUJÁ 900ML', codigo: 'GIN0012', preco: 25.00, imagem: 'assets/images/cachaca/gin-invictus-maracuja-900ml.webp', categoria: 'Gin' },
+    { id: 13, nome: 'GIN ETERNITY ROYALE 900ML', codigo: 'GIN0013', preco: 25.00, imagem: 'assets/images/cachaca/gin-invictus-royale-900ml.jpg', categoria: 'Gin' },
+    { id: 14, nome: 'ZIGGY', codigo: 'ZIG0014', preco: 12.50, imagem: 'assets/images/taba/Ziggy-sabores.jpg', categoria: 'Essências', sabores: ['Happy Berry', 'Cherry Starburst', 'Watermelon Bomb', 'Red Lemonade', 'Maracujá', 'Burley Mint', 'Açaí', 'Banana Tropical', 'Caju Tropical', 'Laranjola', 'Duas Maçãs Verde'] },
+    { id: 15, nome: 'CARVÃO ZOMO UNIDADE', codigo: 'CAR0015', preco: 0.80, imagem: 'assets/images/taba/carvao-avulso-zomo.webp', categoria: 'Carvão' },
+    { id: 16, nome: 'CARVÃO ZOMO 1KG', codigo: 'CAR0016', preco: 27.90, imagem: 'assets/images/taba/carvao-zomo-1kg.webp', categoria: 'Carvão' },
+    { id: 17, nome: 'CIGARRO ROTHMANS MAÇO BLUE', codigo: 'CIC0017', preco: 20.50, imagem: 'assets/images/taba/cigarro_rothmans_blue_global.jpg', categoria: 'Cigarros' },
+    { id: 18, nome: 'CIGARRO ROTHMANS MAÇO RED', codigo: 'CIC0018', preco: 22.80, imagem: 'assets/images/taba/cigarro_rothmans_red_global.jpg', categoria: 'Cigarros' },
+    { id: 19, nome: 'GUARANÁ 2L', codigo: 'GUA0019', preco: 7.90, imagem: 'assets/images/cachaca/em-breve.webp', categoria: 'Refrigerantes 2L' },
+    { id: 20, nome: 'NESCAU 400G', codigo: 'NES0020', preco: 17.50, imagem: 'assets/images/cachaca/em-breve.webp', categoria: 'Outros' },
+    { id: 21, nome: 'ENERGÉTICO RED BULL', codigo: 'RDB0021', preco: 9.80, imagem: 'assets/images/cachaca/em-breve.webp', categoria: 'Energéticos' },
+    { id: 22, nome: 'CHOPP VINHO DRAFT 600ML', codigo: 'DRA0022', preco: 12.90, imagem: 'assets/images/cachaca/vinho-draft-600ml.webp', categoria: 'Vinho' },
+    { id: 23, nome: 'COMBO PASSAPORT', codigo: 'COM0023', preco: 258.00, imagem: 'assets/images/combo-bebida/passaport-red-balde.jpg', categoria: 'Combos-bebidas' },
+    { id: 24, nome: 'COMBO JACK DANIELS + REDBULL + GELO', codigo: 'COM0024', preco: 286.00, imagem: 'assets/images/combo-bebida/jack-red-balde.webp', categoria: 'Combos-bebidas' },
+    { id: 25, nome: 'COMBO BEEFEATER PINK + REDBULL + GELO', codigo: 'COM0025', preco: 270.00, imagem: 'assets/images/combo-bebida/images.jfif', categoria: 'Combos-bebidas' },
+    { id: 26, nome: 'CACHAÇA 51 965ML', codigo: 'CAC0026', preco: 12.50, imagem: 'assets/images/cachaca/Cachaca-Tradicional-51-Garrafa-965ml.webp', categoria: 'Cachaças' },
+    { id: 27, nome: 'CACHAÇA VEIO BARREIRO 910ML', codigo: 'CAC0027', preco: 15.80, imagem: 'assets/images/cachaca/beb10-velho-barreiro-910ml.webp', categoria: 'Cachaças' },
+    { id: 28, nome: 'DRINK GOURMET LARANJA 700ML', codigo: 'DRK0028', preco: 35.00, imagem: 'assets/images//cachaca/drink-goumert/drink-laranja.png', categoria: 'Drinks Gourmet' },
+    { id: 29, nome: 'DRINK GOURMET MORANGO 700ML', codigo: 'DRK0029', preco: 35.00, imagem: 'assets/images/cachaca/drink-goumert/drink-morango.png', categoria: 'Drinks Gourmet' },
+    { id: 30, nome: 'ORIGINAL FARDO 12 UNI', codigo: 'FRDORI0030', preco: 37.90, imagem: 'assets/images/cerveja/pack/fardo-original.jfif', categoria: 'Fardos' },
+    { id: 31, nome: 'PACK HEINEKEN 6 UNI', codigo: 'PCKHEI0031', preco: 42.50, imagem: 'assets/images/cerveja/pack/cerveja-heineken-com-6-926x926-fardo.jpg', categoria: 'Fardos' },
+    { id: 32, nome: 'FARDO SKOL 12UNI', codigo: 'SKOL0032', preco: 35.80, imagem: 'assets/images/cerveja/pack/fardo-skol-12-uni.jfif', categoria: 'Fardos' },
+    { id: 33, nome: 'CERVEJA BRAHMA 350ML LATA', codigo: 'BRH0033', preco: 4.00, imagem: 'assets/images/cerveja/brahma-lata-350ml.webp', categoria: 'Cervejas Avulsas' },
+    { id: 34, nome: 'CERVEJA AMSTEL 350ML LATA', codigo: 'AMS0034', preco: 4.00, imagem: 'assets/images/cerveja/cerveja-amstel-lata-350ml..png', categoria: 'Cervejas Avulsas' },
+    { id: 35, nome: 'CERVEJA ITAIPAVA 269ML LATA', codigo: 'ITA0035', preco: 3.00, imagem: 'assets/images/cerveja/lata-Itaipava-269ml.png', categoria: 'Cervejas Avulsas' },
+    { id: 36, nome: 'CERVEJA BUDWEISER 269ML LATA', codigo: 'BDW0036', preco: 4.00, imagem: 'assets/images//cerveja/lata-Budweiser-269ml.png', categoria: 'Cervejas Avulsas' },
+    { id: 37, nome: 'COMBO ESSÊNCIA 01', codigo: 'CM010037', preco: 25.00, imagem: 'assets/images/combo/super-combo--38.webp', categoria: 'Combos Essências', sabores: ['Mix Básico'] },
+    { id: 38, nome: 'COMBO ESSÊNCIA 02', codigo: 'CN020038', preco: 45.00, imagem: 'assets/images/combo/super-combo-essencias-86.webp', categoria: 'Combos Essências', sabores: ['Mix Premium'] },
+    { id: 39, nome: 'COMBO ESSÊNCIA 03', codigo: 'CM03OO39', preco: 50.00, imagem: 'assets/images/combo/super-combo-170.webp', categoria: 'Combos Essências', sabores: ['Mix Deluxe'] },
+    { id: 40, nome: 'ZOMO', codigo: 'ZOM0040', preco: 12.50, imagem: 'assets/images/taba/zomo-sabores.jpg', categoria: 'Essências', sabores: ['Strong Cherry', 'Strong Lemon', 'Strong Melon', 'Abacaloco', 'Framboera', 'Melomorango', 'Hungria', 'Kev', 'MC WM', 'Açaí Cream', 'Blueberry', 'Cherry Cream', 'Beirut', 'Blue Caribbean'] },
+    { id: 41, nome: 'ADALYA', codigo: 'ADY0041', preco: 12.50, imagem: 'assets/images/taba/adalya-sabores.webp', categoria: 'Essências', sabores: ['Love 66', 'Mango Tango Ice', 'Swiss Bonbon', 'Hawaii', 'Ice Bonbon', 'Blue Moon', 'Caipirinha Brazil', 'Maracujá', 'Banana Milk'] },
+];

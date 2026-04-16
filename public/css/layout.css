@@ -1,0 +1,17 @@
+
+
+/* =========================================
+   LAYOUT PRINCIPAL
+   ========================================= */
+.main-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Área Principal */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 2rem;
+  transition: var(--transition);
+}

@@ -1,0 +1,127 @@
+/* =========================================
+   RESPONSIVIDADE UNIFICADA
+   ========================================= */
+
+/* Tablet e Mobile (< 900px) */
+@media (max-width: 900px) {
+  .main-container { flex-direction: column; }
+  
+  .hamburger-btn { display: flex; }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+  }
+  
+  .sidebar.open { left: 0; }
+  
+  .sidebar-overlay { display: block; }
+  
+  .main-content {
+    margin-left: 0 !important;
+    padding: 5rem 1rem 1rem;
+  }
+  
+  .products-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+  
+  .product-image { height: 140px; }
+  
+  .cart-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .product-card.view-list {
+    flex-direction: column !important;
+    align-items: flex-start;
+    text-align: center;
+  }
+  
+  .product-card.view-list .product-image {
+    width: 100%;
+    min-width: auto;
+    height: 200px;
+  }
+  
+  .product-card.view-list .product-info {
+    align-items: center;
+  }
+  
+  .product-card.view-list .qty-controls {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .product-card.view-list .sabor-container {
+    justify-content: center;
+  }
+}
+
+/* Mobile extra pequeno (< 600px) */
+@media (max-width: 600px) {
+  .cart-drawer { width: 100%; right: -100%; }
+  
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .cart-item-qty {
+    align-self: flex-end;
+    margin-top: 0.5rem;
+  }
+  
+  .radio-options { flex-direction: column; }
+  
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  
+  .product-image { height: 120px; }
+  
+  .product-name { font-size: 0.95rem; }
+  .product-price { font-size: 1.1rem; }
+}
+
+/* Mobile muito pequeno (< 480px) - ajustes extras */
+@media (max-width: 480px) {
+  .product-card.view-list .product-image {
+    height: 160px;
+  }
+  
+  .product-card.view-list .product-name {
+    font-size: 1rem;
+  }
+  
+  .product-card.view-list .product-price {
+    font-size: 1.2rem;
+  }
+  
+  .modal-content {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+}

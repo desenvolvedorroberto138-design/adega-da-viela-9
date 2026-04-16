@@ -1,0 +1,61 @@
+
+/* =========================================
+   VARIÁVEIS & RESET
+   ========================================= */
+:root {
+  --primary: #000000;
+  --primary-dark: #C71585;
+  --secondary: #f805ec;
+  --bg-light: #f8f9fa;
+  --text-dark: #333;
+  --text-muted: #6c757d;
+  --border: #e0e0e0;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-hover: 0 16px 32px rgba(0,0,0,0.15);
+  --radius: 12px;
+  --transition: all 0.3s ease;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #FFFFFF;
+  color: var(--text-dark);
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+/* Acessibilidade: esconde visualmente mas mantém para leitores de tela */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Esconde elementos via JS */
+.hidden {
+  display: none !important;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-light); }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+/* Foco visível para acessibilidade */
+*:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
