@@ -1,8 +1,6 @@
 'use strict';
 
 import { State, safeGet, safeSet, formatarPreco, gerarChave } from './state.js';
-import { produtos } from './data.js';
-import { renderizarProdutos } from './render.js';
 
 export const Cart = {
     cart: safeGet('cart_a9v', {}),
@@ -11,32 +9,25 @@ export const Cart = {
         this.updateDisplay();
     },
 
-    add(id, sabor = '') {
-        const produto = produtos.find(p => p.id === id);
+    add(produto, sabor = '') {
         if (!produto) return;
 
-        const chave = gerarChave(id, sabor);
+        const chave = gerarChave(produto.id, sabor);
 
         if (this.cart[chave]) {
             this.cart[chave].quantidade++;
         } else {
             this.cart[chave] = {
-                id,
-                nome: produto.nome,
-                preco: produto.preco,
-                imagem: produto.imagem,
-                codigo: produto.codigo,
+                id: produto.id,
+                nome: produto.name || produto.nome || 'Sem nome',
+                preco: Number(produto.price ?? produto.preco ?? 0),
+                imagem: produto.image || produto.imagem || 'assets/images/em-breve.webp',
+                codigo: produto.codigo || '',
                 sabor: sabor || null,
                 quantidade: 1
             };
         }
 
-        this.save();
-        this.updateDisplay();
-    },
-
-    remove(chave) {
-        delete this.cart[chave];
         this.save();
         this.updateDisplay();
     },
@@ -47,11 +38,11 @@ export const Cart = {
         this.cart[chave].quantidade += delta;
 
         if (this.cart[chave].quantidade <= 0) {
-            this.remove(chave);
-        } else {
-            this.save();
-            this.updateDisplay();
+            delete this.cart[chave];
         }
+
+        this.save();
+        this.updateDisplay();
     },
 
     clear() {
@@ -69,7 +60,7 @@ export const Cart = {
         let itens = 0;
 
         Object.values(this.cart).forEach(i => {
-            total += i.preco * i.quantidade;
+            total += (Number(i.preco) || 0) * i.quantidade;
             itens += i.quantidade;
         });
 
@@ -80,24 +71,25 @@ export const Cart = {
         const { total, itens } = this.getTotals();
         State.totalGlobal = total;
 
-        // Atualiza badges
-        const badges = document.querySelectorAll('#cartCount, #cartItemsCount');
-        badges.forEach(b => {
-            if (b) b.textContent = itens;
-        });
+        // Atualiza badges (bolinhas de contagem)
+        document.querySelectorAll('#cartCount, #cartItemsCount')
+            .forEach(b => b && (b.textContent = itens));
 
-        // Totais
+        // Atualiza totais financeiros
         const cartTotal = document.getElementById('cartTotal');
         if (cartTotal) cartTotal.textContent = formatarPreco(total);
 
         const footerTotal = document.getElementById('footerTotal');
         if (footerTotal) footerTotal.textContent = formatarPreco(total);
 
-        // Render drawer
         this.renderDrawerItems();
 
-        // 🔥 Atualiza produtos (MOSTRAR QTD NOS CARDS)
-        renderizarProdutos(produtos, this.cart);
+        // 🔥 Sincroniza a vitrine de produtos
+        // Importante: Como agora usamos módulos, verificamos se a função de renderizar 
+        // está disponível para atualizar os botões de +/- nos cards da vitrine
+        if (window.renderizarProdutos) {
+            window.renderizarProdutos(window.__produtosAtuais || [], this.cart);
+        }
     },
 
     renderDrawerItems() {
@@ -107,7 +99,7 @@ export const Cart = {
         const items = Object.values(this.cart);
 
         if (items.length === 0) {
-            container.innerHTML = '<p class="empty-cart">Sua sacola está vazia 🛒</p>';
+            container.innerHTML = '<p class="empty-cart text-center py-8 text-gray-500">Sua sacola está vazia 🛒</p>';
             return;
         }
 
@@ -115,55 +107,47 @@ export const Cart = {
             const chave = gerarChave(item.id, item.sabor || '');
 
             return `
-                <div class="cart-item">
-                    <div class="cart-item-image">
-                        <img src="${item.imagem}" alt="${item.nome}" onerror="this.src='assets/images/cachaca/em-breve.webp'">
+                <div class="cart-item flex items-center gap-4 p-4 border-b border-gray-100">
+                    <div class="cart-item-image w-16 h-16 flex-shrink-0">
+                        <img src="${item.imagem}" 
+                             alt="${item.nome}" 
+                             class="w-full h-full object-contain"
+                             onerror="this.src='assets/images/em-breve.webp'">
                     </div>
 
-                    <div class="cart-item-info">
-                        <h4>
+                    <div class="cart-item-info flex-1">
+                        <h4 class="text-sm font-bold text-gray-800">
                             ${item.nome}
-                            ${item.sabor ? `<br><small>${item.sabor}</small>` : ''}
+                            ${item.sabor ? `<br><small class="text-red-800 font-normal italic">${item.sabor}</small>` : ''}
                         </h4>
-
-                        <span class="cart-item-code">${item.codigo}</span>
-                        <span class="cart-item-total">
+                        <span class="text-[10px] text-gray-400 block uppercase">${item.codigo}</span>
+                        <span class="text-red-900 font-bold">
                             ${formatarPreco(item.preco * item.quantidade)}
                         </span>
                     </div>
 
-                    <div class="cart-item-qty">
-                        <button class="qty-btn" data-action="dec" data-chave="${chave}">−</button>
-                        <span>${item.quantidade}</span>
-                        <button class="qty-btn" data-action="inc" data-chave="${chave}">+</button>
+                    <div class="cart-item-qty flex items-center bg-gray-100 rounded-lg">
+                        <button class="qty-btn px-2 py-1 text-red-800 font-bold" data-action="dec" data-chave="${chave}">−</button>
+                        <span class="w-8 text-center text-sm font-bold">${item.quantidade}</span>
+                        <button class="qty-btn px-2 py-1 text-red-800 font-bold" data-action="inc" data-chave="${chave}">+</button>
                     </div>
                 </div>
             `;
         }).join('');
-    },
 
-    handleQuantityChange(btn) {
-        const action = btn.dataset.action;
+        // Listener para os botões de quantidade dentro do carrinho
+        // Removemos o {once: true} para permitir cliques sucessivos
+        const newContainer = container.cloneNode(true);
+        container.parentNode.replaceChild(newContainer, container);
+        
+        newContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.qty-btn');
+            if (!btn) return;
 
-        // 🔥 CASO 1: botão dentro do carrinho
-        if (btn.dataset.chave) {
             const chave = btn.dataset.chave;
+            const action = btn.dataset.action;
+
             this.updateQuantity(chave, action === 'inc' ? 1 : -1);
-            return;
-        }
-
-        // 🔥 CASO 2: botão nos produtos
-        const id = parseInt(btn.dataset.id);
-        const card = btn.closest('.product-card');
-        const select = card?.querySelector('.select-sabor');
-        const sabor = select ? select.value : '';
-
-        const chave = gerarChave(id, sabor);
-
-        if (action === 'inc') {
-            this.add(id, sabor);
-        } else if (action === 'dec') {
-            this.updateQuantity(chave, -1);
-        }
+        });
     }
 };

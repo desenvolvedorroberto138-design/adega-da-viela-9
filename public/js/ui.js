@@ -1,30 +1,34 @@
 'use strict';
 
 /**
- * INTERFACE DO USUÁRIO
+ * INTERFACE DO USUÁRIO - ADEGA VIELA 9
  */
 
 import { State, $, $$, el, Config, formatarPreco, gerarChave } from './state.js';
 import { Cart } from './cart.js';
-import { renderizarProdutos } from './render.js';
 import { aplicarFiltros } from './filters.js';
 import { 
     abrirModal, fecharModal, enviarWhatsApp, 
     verificarPedidoMinimo, atualizarResumo, buscarCep 
 } from './checkout.js';
 
-// Fecha carrinho drawer
+
+// ==========================
+// 🔥 CARRINHO (FECHAR)
+// ==========================
 export function fecharCarrinho() { 
-    if (document.activeElement) document.activeElement.blur();
-
-    el.cartDrawer?.classList.remove('open'); 
+    const drawer = el.cartDrawer;
+    document.activeElement?.blur();
+    drawer?.classList.remove('open'); 
     el.overlay?.classList.remove('active'); 
-    el.cartDrawer?.setAttribute('aria-hidden','true'); 
-
+    drawer?.setAttribute('aria-hidden', 'true'); 
     el.cartBtn?.focus();
 }
 
-// Sidebar
+
+// ==========================
+// SIDEBAR (MENU MOBILE)
+// ==========================
 export function openSidebar() {
     el.sidebar?.classList.add('open');
     el.hamburgerBtn?.classList.add('active');
@@ -39,13 +43,16 @@ export function closeSidebar() {
     document.body.style.overflow = '';
 }
 
-// EVENTOS
+
+// ==========================
+// EVENTOS GERAIS
+// ==========================
 export function setupEventListeners() {
 
     // CLICK GLOBAL
     document.addEventListener('click', (e) => {
 
-        // Dropdown
+        // Dropdown do Menu
         const toggle = e.target.closest('.dropdown-toggle');
         if (toggle) {
             e.preventDefault();
@@ -55,42 +62,39 @@ export function setupEventListeners() {
             return;
         }
 
-        // Categoria
+        // Seleção de Categoria (Vinhos, Cervejas, etc)
         const cat = e.target.closest('[data-categoria]');
         if (cat) {
             e.preventDefault();
             State.categoriaAtiva = cat.dataset.categoria;
+            
+            // UI Update: destaca a categoria ativa
             $$('[data-categoria]').forEach(b => b.closest('li')?.classList.remove('active'));
             cat.closest('li')?.classList.add('active');
-            aplicarFiltros();
+            
+            // 🔥 Importante: Passa a lista global do Firebase para o filtro
+            aplicarFiltros(window.__produtosAtuais);
+            
+            // Fecha o menu mobile ao clicar (opcional)
+            if (window.innerWidth < 1024) closeSidebar();
             return;
         }
 
-        // BOTÕES + / -
-        const qtyBtn = e.target.closest('.qty-btn');
-        if (qtyBtn) {
-            e.preventDefault();
-
-            Cart.handleQuantityChange(qtyBtn);
-
-            // 🔥 ATUALIZA UI DOS PRODUTOS
-            aplicarFiltros();
-
-            return;
-        }
-
-        // Fecha dropdown
+        // Fecha dropdown se clicar fora
         if (!e.target.closest('.sidebar')) {
             $$('.dropdown').forEach(d => d.classList.remove('active'));
         }
     });
 
-    // 🔥 TROCA DE SABOR (AQUI ESTÁ A MELHORIA)
+
+    // ==========================
+    // TROCA DE SABOR / VARIAÇÃO NO CARD
+    // ==========================
     document.addEventListener('change', (e) => {
         if (e.target.classList.contains('select-sabor')) {
             const select = e.target;
             const card = select.closest('.product-card');
-            const id = parseInt(card.dataset.id);
+            const id = card.dataset.id; // Firestore usa String, não Int
             const sabor = select.value;
 
             const chave = gerarChave(id, sabor);
@@ -103,28 +107,42 @@ export function setupEventListeners() {
         }
     });
 
-    // CEP
+
+    // ==========================
+    // BUSCA DE CEP
+    // ==========================
     el.btnBuscaCep?.addEventListener('click', buscarCep);
     el.clienteCep?.addEventListener('blur', buscarCep);
 
-    // Carrinho
+
+    // ==========================
+    // CARRINHO ABRIR / FECHAR
+    // ==========================
     el.cartBtn?.addEventListener('click', () => { 
         el.cartDrawer?.classList.add('open'); 
         el.overlay?.classList.add('active'); 
+        el.cartDrawer?.removeAttribute('aria-hidden'); 
         Cart.updateDisplay(); 
     });
 
     el.closeCart?.addEventListener('click', fecharCarrinho);
     el.overlay?.addEventListener('click', fecharCarrinho);
 
+
+    // ==========================
+    // LIMPAR CARRINHO
+    // ==========================
     el.clearCart?.addEventListener('click', () => { 
-        if (confirm('Limpar sacola?')) { 
+        if (confirm('Limpar sua sacola de compras?')) { 
             Cart.clear(); 
-            aplicarFiltros();
+            aplicarFiltros(window.__produtosAtuais);
         } 
     });
 
-    // Modal
+
+    // ==========================
+    // MODAL DE CHECKOUT
+    // ==========================
     el.checkoutBtn?.addEventListener('click', abrirModal);
     el.closeModal?.addEventListener('click', fecharModal);
 
@@ -134,12 +152,18 @@ export function setupEventListeners() {
 
     el.enviarWhatsapp?.addEventListener('click', enviarWhatsApp);
 
-    // Pagamento
+
+    // ==========================
+    // LÓGICA DE PAGAMENTO
+    // ==========================
     el.formaPagamento?.addEventListener('change', function() {
         el.trocoContainer?.classList.toggle('hidden', this.value !== 'Dinheiro');
     });
 
-    // Troco
+
+    // ==========================
+    // CÁLCULO DE TROCO
+    // ==========================
     el.inputTroco?.addEventListener('input', () => {
         if (!el.valorTroco) return;
 
@@ -156,27 +180,33 @@ export function setupEventListeners() {
             : `💰 Troco: ${formatarPreco(troco)}`;
     });
 
-    // Inputs
+
+    // ==========================
+    // FILTROS DE BUSCA E ORDENAÇÃO
+    // ==========================
     el.clienteRua?.addEventListener('input', atualizarResumo);
     el.clienteNumero?.addEventListener('input', atualizarResumo);
     el.radioEnvio?.forEach(r => r.addEventListener('change', verificarPedidoMinimo));
 
     el.searchInput?.addEventListener('input', (e) => { 
         State.termoBusca = e.target.value.toLowerCase();
-        aplicarFiltros(); 
+        aplicarFiltros(window.__produtosAtuais); 
     });
 
     el.sortSelect?.addEventListener('change', (e) => { 
         State.ordenacaoAtual = e.target.value;
-        aplicarFiltros(); 
+        aplicarFiltros(window.__produtosAtuais); 
     });
 
     el.viewToggle?.addEventListener('click', () => { 
         State.viewMode = State.viewMode === 'grid' ? 'list' : 'grid';
-        aplicarFiltros(); 
+        aplicarFiltros(window.__produtosAtuais); 
     });
 
-    // ESC
+
+    // ==========================
+    // ATALHOS DE TECLADO
+    // ==========================
     document.addEventListener('keydown', (e) => { 
         if (e.key === 'Escape') { 
             fecharCarrinho(); 
@@ -185,7 +215,10 @@ export function setupEventListeners() {
         } 
     });
 
-    // Menu mobile
+
+    // ==========================
+    // MENU MOBILE (HAMBURGER)
+    // ==========================
     el.hamburgerBtn?.addEventListener('click', () => {
         el.sidebar?.classList.contains('open') ? closeSidebar() : openSidebar();
     });

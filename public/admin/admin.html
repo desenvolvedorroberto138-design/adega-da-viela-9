@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Adega Viela 9</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="../assets/icons/favicon.png">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'viela-dark': '#1a1a1a',
+                        'viela-magenta': '#C71585',
+                        'viela-light': '#f8f9fa',
+                        'viela-black':'#000000'
+                    },
+                    borderRadius: { 'viela': '12px' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .hidden-panel { display: none !important; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; overflow-x: hidden; background-color: #f8f9fa; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #C71585; border-radius: 10px; }
+        .secao-painel.hidden { display: none; }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                max-width: 85vw;
+                height: 100vh;
+                z-index: 100;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { left: 0; }
+            .main-content { margin-left: 0 !important; padding: 5rem 1rem 1rem !important; }
+            .hamburger-btn { display: flex !important; }
+            .sidebar-overlay.show { display: block !important; opacity: 1 !important; }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        #p-categoria:focus {
+            border-color: #C71585;
+            box-shadow: 0 0 5px rgba(199, 21, 133, 0.2);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+   <div id="login-section" class="flex items-center justify-center min-h-screen p-4 bg-[#0a0a0a]">
+    <div class="bg-neutral-900 p-8 rounded-[24px] shadow-2xl w-full max-w-md border border-white/5 relative overflow-hidden">
+        
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-viela-magenta opacity-10 blur-3xl"></div>
+
+        <div class="text-center mb-8 relative">
+            <img src="../assets/images/logo-adm-removebg-preview.png" alt="Logo" class="w-20 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(199,21,133,0.4)]">
+            <h2 class="text-3xl font-black text-white tracking-tight">Adega <span class="text-viela-magenta">Viela 9</span></h2>
+            <p class="text-gray-500 font-bold text-[10px] uppercase tracking-[0.3em] mt-1">Acesso Restrito</p>
+        </div>
+
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">E-mail</label>
+                <input type="email" id="admin-email" required 
+                    class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-viela-magenta outline-none transition-all placeholder:text-gray-700" 
+                    placeholder="admin@adegaviela9.com">
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Senha</label>
+                <div class="relative flex items-center">
+                    <input type="password" id="admin-password" required 
+                        class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-viela-magenta outline-none transition-all placeholder:text-gray-700" 
+                        placeholder="••••••••">
+                    
+                    <button type="button" id="toggle-password" 
+                        class="absolute right-3 p-2 text-gray-500 hover:text-viela-magenta focus:outline-none cursor-pointer transition-colors">
+                        <i class="fa-regular fa-eye-slash" id="eye-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-viela-magenta text-white py-4 rounded-xl font-black hover:opacity-90 hover:scale-[1.01] transition-all shadow-[0_10px_20px_rgba(199,21,133,0.2)] active:scale-[0.98] uppercase text-xs tracking-widest mt-2">
+                Acessar Painel
+            </button>
+        </form>
+
+        <p class="text-center text-gray-700 text-[10px] mt-8 font-medium uppercase tracking-widest">
+            © 2026 Roberto Aparecido
+        </p>
+    </div>
+</div>
+
+    <div id="admin-panel" class="hidden-panel flex h-screen relative">
+        <button id="hamburger-menu" class="hamburger-btn hidden fixed top-4 left-4 z-[110] bg-viela-magenta text-white w-12 h-12 rounded-full items-center justify-center shadow-2xl active:scale-90 transition-all">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+        <aside id="sidebar" class="sidebar w-64 bg-viela-dark text-white flex flex-col p-6 shadow-2xl shrink-0">
+            <div class="mb-10 text-center">
+                <img src="../assets/images/logo-adm-removebg-preview.png" alt="Logo" class="w-17 mx-auto mb-4">
+                <h1 class="text-xl font-black italic text-viela-magenta tracking-tighter uppercase leading-tight">Adega<br>Viela 9</h1>
+            </div>
+            <nav class="flex-1 space-y-2">
+                <a href="#" data-target="aba-dashboard" class="menu-item flex items-center p-3 text-gray-400 hover:text-white transition group">
+                    <i class="fas fa-chart-line mr-3 group-hover:text-viela-magenta"></i> Dashboard
+                </a>
+                <a href="#" data-target="aba-produtos" class="menu-item flex items-center p-3 rounded-lg bg-viela-magenta text-white font-bold shadow-md">
+                    <i class="fas fa-box mr-3"></i> Produtos
+                </a>
+                <a href="#" data-target="aba-pedidos" class="menu-item flex items-center p-3 text-gray-400 hover:text-white transition group">
+                    <i class="fas fa-receipt mr-3 group-hover:text-viela-magenta"></i> Pedidos
+                </a>
+                <a href="#" data-target="aba-pdv" class="menu-item flex items-center p-3 text-gray-400 hover:text-white transition group">
+                    <i class="fas fa-desktop mr-3 group-hover:text-viela-magenta"></i> PDV (Balcão)
+                </a>
+            </nav>
+            <button id="btn-logout" class="mt-auto flex items-center justify-center p-3 bg-gray-800 rounded-lg hover:bg-red-600 transition text-sm font-bold">
+                <i class="fas fa-sign-out-alt mr-2"></i> Sair
+            </button>
+        </aside>
+
+       <main id="admin-main-content" class="main-content flex-1 overflow-y-auto p-4 md:p-8 bg-viela-light">
+
+    <section id="aba-dashboard" class="secao-painel hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold text-viela-dark">Dashboard</h2>
+            <p class="text-gray-500">Resumo de vendas da Adega Viela 9</p>
+        </header>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-viela shadow-sm border-l-4 border-viela-magenta">
+                <p class="text-xs font-bold text-gray-400 uppercase">Vendas Hoje</p>
+                <p class="text-2xl font-black text-viela-dark">R$ 0,00</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="aba-produtos" class="secao-painel">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-viela-dark">Inventário</h2>
+                <div class="relative mt-4 w-full md:w-80">
+                    <input type="text" id="admin-search" class="w-full pl-10 pr-4 py-3 border rounded-full outline-none focus:ring-2 focus:ring-viela-magenta shadow-sm" placeholder="Buscar produto...">
+                    <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+                </div>
+            </div>
+            <button onclick="document.getElementById('cadastro-section').scrollIntoView({behavior: 'smooth'})" class="w-full md:w-auto bg-viela-magenta text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition">
+                <i class="fas fa-plus mr-2"></i> Novo Produto
+            </button>
+        </header>
+
+        <div id="admin-product-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-12">
+            </div>
+
+        <section id="cadastro-section" class="bg-white p-6 md:p-8 rounded-viela shadow-lg border border-gray-100 max-w-4xl mx-auto mb-20">
+            <h3 id="form-title" class="text-xl font-bold text-viela-dark mb-6">Cadastrar/Editar Produto</h3>
+            <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-[11px] font-black uppercase text-gray-500 mb-1">Nome do Produto</label>
+                    <input type="text" id="p-nome" required class="w-full border p-3 rounded-lg focus:border-viela-magenta outline-none bg-gray-50">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[11px] font-black uppercase text-gray-500 mb-1">Sabores / Descrição</label>
+                    <input type="text" id="p-sabores" class="w-full border p-3 rounded-lg focus:border-viela-magenta outline-none bg-gray-50" placeholder="Ex: Morango, Chocolate, 1 Litro...">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black uppercase text-gray-500 mb-1">Preço (R$)</label>
+                    <input type="number" id="p-preco" step="0.01" required class="w-full border p-3 rounded-lg focus:border-viela-magenta outline-none bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black uppercase text-gray-500 mb-1">Categoria</label>
+                    <select id="p-categoria" required class="w-full border p-3 rounded-lg focus:border-viela-magenta outline-none bg-white">
+                        <optgroup label="🍺 Cervejas">
+                            <option value="Cervejas Avulsas">Cervejas Avulsas</option>
+                            <option value="Fardos">Fardos</option>
+                        </optgroup>
+                        <optgroup label="🍷 Bebidas e Doses">
+                            <option value="Doses">Doses</option>
+                            <option value="Drinks Gourmet">Caipirinhas</option>
+                            <option value="Combos-bebidas">Combos Bebidas</option>
+                            <option value="Cachaças">Cachaças</option>
+                            <option value="Gin">Gin</option>
+                            <option value="Vinho">Vinho</option>
+                            <option value="Whisky">Whisky</option>
+                        </optgroup>
+                        <optgroup label="🥤 Refrigerantes">
+                            <option value="Refrigerantes Lata">Lata</option>
+                            <option value="Refrigerantes 2L">2 Litros</option>
+                            <option value="Energéticos">Energéticos</option>
+                        </optgroup>
+                        <optgroup label="🚬 Tabacaria">
+                            <option value="Essências">Essências</option>
+                            <option value="Combos Essências">Combos Essências</option>
+                            <option value="Carvão">Carvão</option>
+                            <option value="Cigarros">Cigarros</option>
+                        </optgroup>
+                        <optgroup label="🍫 Mercearia">
+                            <option value="Salgadinhos">Salgadinhos</option>
+                            <option value="Doces">Doces</option>
+                        </optgroup>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black uppercase text-gray-500 mb-1">Estoque Atual</label>
+                    <input type="number" id="p-estoque" required class="w-full border p-3 rounded-lg focus:border-viela-magenta outline-none bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black uppercase text-gray-500 mb-1">URL da Imagem</label>
+                    <input type="text" id="p-imagem-url" class="w-full border p-3 rounded-lg focus:border-viela-magenta outline-none bg-gray-50">
+                </div>
+                <div class="md:col-span-2 grid grid-cols-2 gap-3 mt-4">
+                    <button type="submit" id="btn-submit" class="bg-viela-dark text-white py-2.5 rounded-md text-[11px] font-black transition-all duration-300 uppercase tracking-widest border-b-2 border-viela-magenta hover:bg-viela-magenta hover:shadow-[0_0_15px_rgba(233,30,99,0.3)] active:scale-95">
+                        Salvar Produto
+                    </button>
+                    <button type="button" id="btn-cancelar" onclick="resetarFormulario()" class="bg-transparent text-gray-500 py-2.5 rounded-md text-[11px] font-bold transition-all duration-300 uppercase tracking-widest border border-gray-700 hover:bg-gray-800 hover:text-white active:scale-95">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+    </section>
+
+    <section id="aba-pedidos" class="secao-painel hidden">
+        <header class="mb-8">
+            <h2 class="text-3xl font-bold text-viela-dark">Gestão de Pedidos</h2>
+            <p class="text-gray-500">Acompanhe o fluxo da Adega em tempo real</p>
+        </header>
+
+        <div id="admin-orders-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+            
+            <div class="bg-gray-200/50 p-3 rounded-xl border-t-4 border-yellow-500 min-h-[500px]">
+                <h3 class="text-yellow-700 font-black text-xs uppercase mb-4 flex items-center justify-between">
+                    <span>🔴 Novos Pedidos</span>
+                    <i class="fas fa-bell animate-pulse"></i>
+                </h3>
+                <div id="list-pending" class="space-y-3">
+                    <p class="text-[10px] text-gray-400 text-center py-10 uppercase">Aguardando...</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-200/50 p-3 rounded-xl border-t-4 border-blue-500 min-h-[500px]">
+                <h3 class="text-blue-700 font-black text-xs uppercase mb-4 flex items-center justify-between">
+                    <span>🔵 No Balcão</span>
+                    <i class="fas fa-cocktail"></i>
+                </h3>
+                <div id="list-preparing" class="space-y-3"></div>
+            </div>
+
+            <div class="bg-gray-200/50 p-3 rounded-xl border-t-4 border-purple-500 min-h-[500px]">
+                <h3 class="text-purple-700 font-black text-xs uppercase mb-4 flex items-center justify-between">
+                    <span>🛵 Saiu / Pronto</span>
+                    <i class="fas fa-motorcycle"></i>
+                </h3>
+                <div id="list-shipping" class="space-y-3"></div>
+            </div>
+
+            <div class="bg-gray-200/50 p-3 rounded-xl border-t-4 border-green-600 min-h-[500px] opacity-80">
+                <h3 class="text-green-800 font-black text-xs uppercase mb-4 flex items-center justify-between">
+                    <span>✅ Concluídos</span>
+                    <i class="fas fa-check-double"></i>
+                </h3>
+                <div id="list-done" class="space-y-3"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="aba-pdv" class="secao-painel hidden">
+        <h2 class="text-3xl font-bold text-viela-dark">PDV (Balcão)</h2>
+        <p class="text-gray-500">Em desenvolvimento para a Adega Viela 9...</p>
+    </section>
+
+</main>
+    </div>
+
+    <script type="module" src="./modules/admin.js"></script>
+    <script>
+        // Script da Gaveta e Menu
+        const btnMenu = document.getElementById('hamburger-menu');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const mainContent = document.getElementById('admin-main-content');
+        const menuLinks = document.querySelectorAll('.menu-item');
+
+        function toggleDrawer() {
+            const isOpen = sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+            const icon = btnMenu.querySelector('i');
+            icon.classList.toggle('fa-bars', !isOpen);
+            icon.classList.toggle('fa-times', isOpen);
+        }
+
+        if(btnMenu) {
+            btnMenu.onclick = toggleDrawer;
+            overlay.onclick = toggleDrawer;
+            menuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (window.innerWidth <= 900) toggleDrawer();
+                });
+            });
+        }
+
+        // Lógica para Mostrar/Esconder Senha
+    const btnToggle = document.getElementById('toggle-password');
+    const inputSenha = document.getElementById('admin-password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    if (btnToggle && inputSenha) {
+        btnToggle.addEventListener('click', () => {
+            // Alterna o tipo do input
+            const isPassword = inputSenha.type === 'password';
+            inputSenha.type = isPassword ? 'text' : 'password';
+
+            // Alterna as classes do ícone (olho aberto / fechado)
+            if (isPassword) {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+                eyeIcon.classList.add('text-viela-magenta'); // Dá um destaque quando visível
+            } else {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.remove('text-viela-magenta');
+                eyeIcon.classList.add('fa-eye-slash');
+            }
+        });
+    }
+    </script>
+</body>
+</html>

@@ -2,15 +2,73 @@
 
 /**
  * CHECKOUT & MODAL
- * Lógica do modal de finalização e WhatsApp
+ * Lógica do modal de finalização, Firestore e WhatsApp
  */
 
-import { State, $, $$, formatarPreco, Config, el } from './state.js';
+import { State, formatarPreco, Config, el } from './state.js';
 import { Cart } from './cart.js';
-import { renderizarProdutos } from './render.js';
-import { fecharCarrinho } from './ui.js';
 
-// Verifica regras de pedido mínimo e atualiza UI
+// 🔥 FIREBASE
+import { db } from "./firebase.js";
+import { addDoc, collection, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ================================
+// 🔥 SALVAR PEDIDO NO FIRESTORE
+// ================================
+async function salvarPedidoNoFirestore(dadosCliente, opcao, taxaEntrega, totalFinal) {
+    try {
+        const items = Object.values(Cart.cart).map(i => ({
+            productId: i.id,
+            name: i.nome,
+            price: i.preco,
+            quantity: i.quantidade,
+            sabor: i.sabor || 'N/A'
+        }));
+
+        // 💰 TROCO
+        const valorTroco = (dadosCliente.pag === 'Dinheiro' && el.inputTroco?.value)
+            ? Number(el.inputTroco.value.replace(',', '.'))
+            : 0;
+
+        const trocoCalculado = valorTroco > 0
+            ? Number((valorTroco - totalFinal).toFixed(2))
+            : 0;
+
+        const pedidoData = {
+            cliente: {
+                nome: dadosCliente.nome,
+                telefone: dadosCliente.tel,
+                cep: el.clienteCep?.value || '',
+                rua: el.clienteRua?.value || '',
+                numero: el.clienteNumero?.value || '',
+                bairro: el.clienteBairro?.value || '',
+                cidade: el.clienteCidade?.value || '',
+                referencia: el.clienteReferencia?.value || ''
+            },
+            entrega: {
+                tipo: opcao,
+                taxa: taxaEntrega
+            },
+            pagamento: dadosCliente.pag,
+            trocoPara: valorTroco,
+            trocoCalculado: trocoCalculado,
+            items,
+            total: totalFinal,
+            status: "pending",
+            createdAt: serverTimestamp()
+        };
+
+        await addDoc(collection(db, "orders"), pedidoData);
+        console.log("✅ Pedido salvo no Firestore com sucesso!");
+
+    } catch (error) {
+        console.error("❌ Erro ao salvar pedido no Firestore:", error);
+    }
+}
+
+// ================================
+// VERIFICA PEDIDO MÍNIMO
+// ================================
 export function verificarPedidoMinimo() {
     if (!el.textoInformativo) return;
     
@@ -18,44 +76,26 @@ export function verificarPedidoMinimo() {
     const isRetirada = opcao === 'retirada';
 
     if (opcao === 'entrega' && State.totalGlobal < Config.PEDIDO_MINIMO_ENTREGA) {
-        const falta = (Config.PEDIDO_MINIMO_ENTREGA - State.totalGlobal)
-            .toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        el.textoInformativo.innerHTML = `⚠️ <strong>Pedido mínimo para entrega:</strong> R$ 25,00<br>Faltam apenas <strong>${falta}</strong> para liberar.`;
+        const falta = (Config.PEDIDO_MINIMO_ENTREGA - State.totalGlobal);
+        el.textoInformativo.innerHTML = `⚠️ <strong>Pedido mínimo para entrega:</strong> R$ 25,00<br>Faltam apenas <strong>${formatarPreco(falta)}</strong> para liberar.`;
         el.textoInformativo.style.borderLeftColor = '#ff9800';
     } else if (opcao === 'entrega') {
-        el.textoInformativo.innerHTML = `📍 <strong>Entrega:</strong><br>Informe seu endereço no próximo passo.<br><small>Taxa fixa de entrega: ${formatarPreco(Config.TAXA_ENTREGA_FIXA)}.</small>`;
+        el.textoInformativo.innerHTML = `📍 <strong>Entrega:</strong><br>Informe seu endereço abaixo.<br><small>Taxa fixa: ${formatarPreco(Config.TAXA_ENTREGA_FIXA)}.</small>`;
         el.textoInformativo.style.borderLeftColor = '#bb06ac';
     } else {
         el.textoInformativo.innerHTML = `🏪 <strong>Retirada na loja:</strong><br>${Config.ENDERECO_LOJA}<br>${Config.HORARIO_FUNCIONAMENTO}`;
         el.textoInformativo.style.borderLeftColor = '#28a745';
     }
 
-    // Controla campo endereço
-   // Controla campo endereço
-if (el.enderecoGroup) {
-    if (isRetirada) {
-        el.enderecoGroup.classList.add('hidden');
-
-        if (el.clienteRua) el.clienteRua.value = '';
-        if (el.clienteNumero) el.clienteNumero.value = '';
-        if (el.clienteComplemento) el.clienteComplemento.value = '';
-        if (el.clienteReferencia) el.clienteReferencia.value = '';
-
-        if (el.enderecoHelp) {
-            el.enderecoHelp.textContent = 'Não necessário para retirada.';
-        }
-    } else {
-        el.enderecoGroup.classList.remove('hidden');
-
-        if (el.enderecoHelp) {
-            el.enderecoHelp.textContent = 'Campo obrigatório para entregas.';
-        }
+    if (el.enderecoGroup) {
+        el.enderecoGroup.classList.toggle('hidden', isRetirada);
     }
-}
     atualizarResumo();
 }
 
-// Atualiza resumo do pedido no modal
+// ================================
+// RESUMO FINANCEIRO NO MODAL
+// ================================
 export function atualizarResumo() {
     if (!el.resumoProdutos || !el.resumoEntrega || !el.resumoTotal) return;
     
@@ -64,157 +104,163 @@ export function atualizarResumo() {
     const taxa = isRet ? 0 : Config.TAXA_ENTREGA_FIXA;
 
     el.resumoProdutos.textContent = formatarPreco(State.totalGlobal);
-    el.resumoEntrega.textContent = isRet ? 'Retirada na loja' : formatarPreco(taxa);
+    el.resumoEntrega.textContent = isRet ? 'Grátis' : formatarPreco(taxa);
     el.resumoTotal.textContent = formatarPreco(State.totalGlobal + taxa);
 }
 
-// Abre modal de checkout
+// ================================
+// LÓGICA DO MODAL
+// ================================
 export function abrirModal() {
     if (State.totalGlobal === 0) return alert('🛒 Adicione produtos antes de finalizar.');
-
-    if (el.checkoutForm) el.checkoutForm.reset();
-    const tipoEntrega = document.querySelector('#tipoEntrega');
-    if (tipoEntrega) tipoEntrega.checked = true;
     
-    el.trocoContainer?.classList.add('hidden');
-    if (el.valorTroco) el.valorTroco.textContent = '';
-
+    el.modal?.classList.add('active');
+    el.modal?.removeAttribute('aria-hidden');
+    el.modal?.removeAttribute('inert');
+    
     verificarPedidoMinimo();
     atualizarResumo();
 
-    el.modal?.classList.add('active');
-    el.modal?.setAttribute('aria-hidden', 'false');
+    setTimeout(() => el.clienteNome?.focus(), 300);
 }
 
-// Fecha modal
 export function fecharModal() {
     el.modal?.classList.remove('active');
     el.modal?.setAttribute('aria-hidden', 'true');
+    el.modal?.setAttribute('inert', '');
 }
 
-// Envia pedido via WhatsApp
-export function enviarWhatsApp() {
+// ================================
+// 🔥 ENVIAR WHATSAPP + SALVAR
+// ================================
+export async function enviarWhatsApp() {
     const opcao = document.querySelector('input[name="opcaoEnvio"]:checked')?.value || 'entrega';
-    const nome = el.clienteNome ? el.clienteNome.value.trim() : '';
-    const tel = el.clienteTelefone ? el.clienteTelefone.value.trim() : '';
-    const pag = el.formaPagamento ? el.formaPagamento.value : '';
-
-    // Validações básicas
-    if (!nome || !tel || !pag) return alert('⚠️ Preencha: Nome, Telefone e Forma de Pagamento!');
+    const nome = el.clienteNome?.value.trim() || '';
+    const tel = el.clienteTelefone?.value.trim() || '';
+    const pag = el.formaPagamento?.value || '';
     
-    if (opcao === 'entrega' && State.totalGlobal < Config.PEDIDO_MINIMO_ENTREGA) {
-        return alert(`🚚 Pedido mínimo para entrega é R$ 25,00.\nAdicione mais itens ou escolha "Retirada".`);
+    const rua = el.clienteRua?.value.trim() || '';
+    const num = el.clienteNumero?.value.trim() || '';
+    const bairro = el.clienteBairro?.value.trim() || '';
+    const ref = el.clienteReferencia?.value.trim() || '';
+    const cep = el.clienteCep?.value.trim() || '';
+
+    if (!nome || !tel || !pag) return alert('⚠️ Preencha Nome, Telefone e Forma de Pagamento!');
+    
+    if (opcao === 'entrega') {
+        if (State.totalGlobal < Config.PEDIDO_MINIMO_ENTREGA) {
+            return alert(`🚚 Pedido mínimo para entrega é ${formatarPreco(Config.PEDIDO_MINIMO_ENTREGA)}.`);
+        }
+        if (!rua || !num || !bairro) {
+            return alert('⚠️ Por favor, preencha o endereço completo!');
+        }
     }
+
+    const taxaEntrega = (opcao === 'entrega') ? Config.TAXA_ENTREGA_FIXA : 0;
+    const totalFinal = State.totalGlobal + taxaEntrega;
+
+    // 🚨 BLOQUEIO SE DINHEIRO INSUFICIENTE
+    let valorPago = 0;
+    if (pag === 'Dinheiro' && el.inputTroco?.value) {
+        valorPago = Number(el.inputTroco.value.replace(',', '.'));
+
+        if (valorPago < totalFinal) {
+            return alert("⚠️ O valor para troco é menor que o total do pedido.");
+        }
+    }
+
+    // --- 🔥 INCLUSÃO: TRAVA DE ESTOQUE ANTES DE FINALIZAR ---
+    for (const item of Object.values(Cart.cart)) {
+        if (item.id) {
+            const pRef = doc(db, "products", item.id);
+            const pSnap = await getDoc(pRef);
+            
+            if (pSnap.exists()) {
+                const estoqueDisponivel = pSnap.data().estoque ?? 0;
+                if (estoqueDisponivel < item.quantidade) {
+                    return alert(`❌ ESTOQUE INSUFICIENTE!\nO item "${item.nome}" só tem ${estoqueDisponivel} unidade(s) disponível(is) no momento.`);
+                }
+            }
+        }
+    }
+
+    // 1. Salva no Firestore
+    await salvarPedidoNoFirestore({ nome, tel, pag }, opcao, taxaEntrega, totalFinal);
+
+    // 2. Mensagem WhatsApp
+    let msg = `🛒 *NOVO PEDIDO - ADEGA VIELA 9*\n\n`;
+    msg += `👤 *Cliente:* ${nome}\n`;
+    msg += `📱 *Telefone:* ${tel}\n`;
 
     if (opcao === 'entrega') {
-        if (!el.clienteCep.value || el.clienteCep.value.length < 9) {
-            return alert('📍 Informe um CEP válido!');
-        }
-        if (!el.clienteRua.value) {
-            return alert('📍 Busque o CEP antes de continuar!');
-        }
-        if (!el.clienteNumero.value.trim()) {
-            return alert('🏠 Informe o número da residência!');
-        }
-    }
-
-    if (pag === 'Dinheiro' && !el.inputTroco?.value.trim()) {
-        return alert('💵 Informe o valor para troco!');
-    }
-
-    // Calcula totais
-    const taxaEntrega = (opcao === 'entrega' && State.totalGlobal >= Config.PEDIDO_MINIMO_ENTREGA) 
-        ? Config.TAXA_ENTREGA_FIXA : 0;
-    const totalFinal = State.totalGlobal + taxaEntrega;
-    
-    // Monta mensagem
-    let msg = `🛒 *NOVO PEDIDO - ADEGA VIELA 9*\n\n`;
-    msg += `👤 *Cliente:* ${nome.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}\n`;
-    msg += `📱 *Telefone:* ${tel.replace(/\D/g, '').replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')}\n`;
-    
-    if (opcao === 'retirada') {
-        msg += `🏪 *Retirada na loja*\n📍 ${Config.ENDERECO_LOJA}\n🕒 ${Config.HORARIO_FUNCIONAMENTO}\n`;
+        msg += `📍 *Endereço:* ${rua}, Nº ${num}\n`;
+        msg += `📌 *Bairro:* ${bairro}\n`;
+        if (ref) msg += `🗺️ *Ref:* ${ref}\n`;
+        msg += `📮 *CEP:* ${cep}\n`;
     } else {
-        const comp = el.clienteComplemento?.value.trim();
-        const ref = el.clienteReferencia?.value.trim();
-        
-        msg += `🚚 *Entrega:* ${taxaEntrega > 0 ? formatarPreco(taxaEntrega) : 'Grátis'}\n`;
-        msg += `📍 *Endereço:* ${el.clienteRua.value}, Nº ${el.clienteNumero.value.trim()}`;
-        if (comp) msg += ` - ${comp}`;
-        msg += `\n📌 ${el.clienteBairro.value} - ${el.clienteCidade.value}`;
-        if (ref) msg += `\n🗺️ Ref: ${ref}`;
-        msg += `\n📮 CEP: ${el.clienteCep.value}\n`;
+        msg += `🏪 *Tipo:* Retirada na Loja\n`;
     }
-    
+
     msg += `\n🍻 *Itens:*\n━━━━━━━━━━━━━━━\n`;
     Object.values(Cart.cart).forEach(i => {
-        msg += `• ${i.nome}${i.sabor ? ` (${i.sabor})` : ''} x${i.quantidade} — ${formatarPreco(i.preco * i.quantidade)}\n`;
+        msg += `• ${i.nome} ${i.sabor ? `(${i.sabor})` : ''} x${i.quantidade} — ${formatarPreco(i.preco * i.quantidade)}\n`;
     });
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `💰 *Subtotal:* ${formatarPreco(State.totalGlobal)}\n`;
-    
-    if (opcao === 'entrega') {
-        msg += `🚚 *Entrega:* ${formatarPreco(taxaEntrega)}\n`;
-    }
-    msg += `🧾 *TOTAL:* *${formatarPreco(totalFinal)}*\n\n`;
+    if (taxaEntrega > 0) msg += `🚚 *Entrega:* ${formatarPreco(taxaEntrega)}\n`;
+    msg += `🧾 *TOTAL: ${formatarPreco(totalFinal)}*\n`;
     msg += `💳 *Pagamento:* ${pag}\n`;
 
-    if (pag === 'Dinheiro') {
-        const trocoVal = parseFloat(el.inputTroco.value.replace(',', '.'));
-        const trocoCalc = trocoVal - totalFinal;
-        msg += `💵 *Troco para:* ${formatarPreco(trocoVal)}\n`;
-        msg += trocoCalc >= 0 
-            ? `💰 *Troco:* ${formatarPreco(trocoCalc)}\n` 
-            : `⚠️ *Valor insuficiente para troco!*\n`;
+    // 💵 TROCO NO WHATSAPP
+    if (pag === 'Dinheiro' && valorPago > 0) {
+        const troco = Number((valorPago - totalFinal).toFixed(2));
+        msg += `💵 *Troco para:* ${formatarPreco(valorPago)}\n`;
+        msg += `💰 *Troco:* ${formatarPreco(troco)}\n`;
     }
 
-    const agora = new Date();
-    msg += `\n⏰ Pedido: ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
+    const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    msg += `\n⏰ *Pedido às:* ${hora}`;
 
-    // Limpa carrinho e envia
+    const linkZap = `https://wa.me/${Config.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(linkZap, '_blank');
+
     Cart.clear();
-    renderizarProdutos();
     fecharModal();
-    fecharCarrinho();
-
-    window.open(`https://wa.me/${Config.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+    location.reload();
 }
 
-// Busca CEP via ViaCEP
+// ================================
+// 📍 BUSCA DE CEP
+// ================================
 export async function buscarCep() {
-    const cep = el.clienteCep.value.replace(/\D/g, '');
+    const cepInput = el.clienteCep?.value.replace(/\D/g, '');
     
-    el.cepError.style.display = 'none';
-    el.cepSuccess.style.display = 'none';
-
-    if (cep.length !== 8) {
-        el.cepError.style.display = 'block';
-        return;
+    if (!cepInput || cepInput.length !== 8) {
+        return alert("Digite um CEP válido com 8 números.");
     }
 
-    el.cepLoading.style.display = 'flex';
-
     try {
-        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        if (el.btnBuscaCep) el.btnBuscaCep.textContent = "⌛...";
+
+        const res = await fetch(`https://viacep.com.br/ws/${cepInput}/json/`);
         const data = await res.json();
 
-        if (data.erro) throw new Error();
+        if (data.erro) {
+            alert("❌ CEP não encontrado!");
+            return;
+        }
 
-        el.clienteRua.value = data.logradouro || '';
-        el.clienteBairro.value = data.bairro || '';
-        el.clienteCidade.value = `${data.localidade} - ${data.uf}` || '';
+        if (el.clienteRua) el.clienteRua.value = data.logradouro || '';
+        if (el.clienteBairro) el.clienteBairro.value = data.bairro || '';
+        if (el.clienteCidade) el.clienteCidade.value = `${data.localidade} - ${data.uf}`;
+        
+        el.clienteNumero?.focus();
 
-        el.cepSuccess.style.display = 'block';
-        State.cepValido = true;
-        State.cepDados = data;
-
-    } catch {
-        el.clienteRua.value = '';
-        el.clienteBairro.value = '';
-        el.clienteCidade.value = '';
-        el.cepError.style.display = 'block';
-        State.cepValido = false;
+    } catch (error) {
+        console.error("Erro ao buscar CEP:", error);
+        alert("Erro ao buscar CEP.");
     } finally {
-        el.cepLoading.style.display = 'none';
+        if (el.btnBuscaCep) el.btnBuscaCep.textContent = "🔍";
     }
 }
