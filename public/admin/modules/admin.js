@@ -5,11 +5,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import { collection, addDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // IMPORTAÇÃO DOS SEUS MÓDULOS
-import { initTabs } from '../modules/ui.js';
-import { login, logout } from '../modules/auth.js';
-import { escutarProdutos, prepararEdicao, excluirProduto, alterarEstoque, cancelarEdicao, filtrarProdutos } from '../modules/produtos.js';
-import { escutarPedidos, excluirPedido, marcarComoEntregue } from '../modules/pedidos.js';
-
+import { initTabs } from './ui.js';
+import { login, logout } from './auth.js';
+import { escutarProdutos, prepararEdicao, excluirProduto, alterarEstoque, cancelarEdicao, filtrarProdutos } from './produtos.js';
+import { escutarPedidos, excluirPedido, marcarComoEntregue } from './pedidos.js';
 
 
 const loginSection = document.getElementById('login-section');

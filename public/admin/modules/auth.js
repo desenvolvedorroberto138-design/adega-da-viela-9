@@ -38,7 +38,7 @@ export async function logout() {
     if (confirm("Deseja sair do painel administrativo?")) {
         try {
             await signOut(auth);
-            // Opcional: window.location.href = '../login.html'; 
+            window.location.reload(); 
         } catch (err) {
             console.error("Erro ao deslogar:", err);
         }
